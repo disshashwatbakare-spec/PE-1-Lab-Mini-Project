@@ -1,0 +1,4 @@
+Approach,Accuracy,Precision,Recall,F1
+Rule-only,0.9908,0.9853,0.9935,0.9894
+ML-only,0.9998,1.0,0.9995,0.9998
+Fused,0.9998,1.0,0.9995,0.9998

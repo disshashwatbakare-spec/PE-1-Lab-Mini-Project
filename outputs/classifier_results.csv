@@ -1,0 +1,13 @@
+FeatureSelection,Classifier,NumFeatures,Accuracy,Precision,Recall,F1,ROC-AUC
+All Features,LogisticRegression,50,1.0,1.0,1.0,1.0,1.0
+All Features,XGBoost,50,1.0,1.0,1.0,1.0,1.0
+All Features,MLPClassifier,50,0.9995,1.0,0.9989,0.9994,1.0
+SelectKBest,LogisticRegression,25,0.9995,1.0,0.9989,0.9994,1.0
+SelectKBest,XGBoost,25,1.0,1.0,1.0,1.0,1.0
+SelectKBest,MLPClassifier,25,0.999,0.9989,0.9989,0.9989,1.0
+RFE,LogisticRegression,20,1.0,1.0,1.0,1.0,1.0
+RFE,XGBoost,20,1.0,1.0,1.0,1.0,1.0
+RFE,MLPClassifier,20,0.9995,1.0,0.9989,0.9994,1.0
+Greedy,LogisticRegression,12,0.9995,1.0,0.9989,0.9994,1.0
+Greedy,XGBoost,12,1.0,1.0,1.0,1.0,1.0
+Greedy,MLPClassifier,12,0.999,0.9989,0.9989,0.9989,1.0
