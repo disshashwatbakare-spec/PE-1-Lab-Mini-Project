@@ -64,98 +64,126 @@ RULE_DEFINITIONS = [
         "threshold"  : 80.0,
         "direction"  : "<",
         "weight"     : 3.0,
+        "severity"   : "CRITICAL",
         "description": "Low URL brand similarity index (<80)",
-    },
-    {
-        "feature"    : "HasSocialNet",
-        "threshold"  : 0.5,
-        "direction"  : "<",
-        "weight"     : 2.5,
-        "description": "No social network integration links",
-    },
-    {
-        "feature"    : "HasCopyrightInfo",
-        "threshold"  : 0.5,
-        "direction"  : "<",
-        "weight"     : 2.5,
-        "description": "No legitimate copyright notice on page",
-    },
-    {
-        "feature"    : "HasDescription",
-        "threshold"  : 0.5,
-        "direction"  : "<",
-        "weight"     : 2.0,
-        "description": "Missing website meta description",
-    },
-    {
-        "feature"    : "IsHTTPS",
-        "threshold"  : 0.5,
-        "direction"  : "<",
-        "weight"     : 2.5,
-        "description": "Insecure HTTP protocol (no SSL/TLS certificate)",
-    },
-    {
-        "feature"    : "DomainTitleMatchScore",
-        "threshold"  : 30.0,
-        "direction"  : "<",
-        "weight"     : 2.0,
-        "description": "Low domain-to-page title match score (<30)",
+        "implication": "Domain mimics recognizable corporate or financial brand names while registering under an unauthorized namespace, a primary indicator of typosquatting or phishing kits.",
     },
     {
         "feature"    : "IsDomainIP",
         "threshold"  : 0.5,
         "direction"  : ">",
         "weight"     : 3.0,
+        "severity"   : "CRITICAL",
         "description": "Raw IP address used as domain instead of hostname",
+        "implication": "Direct numerical IP addressing bypasses domain registrar validation and standard DNS reputation registries, commonly indicating bulletproof hosting infrastructure.",
+    },
+    {
+        "feature"    : "IsHTTPS",
+        "threshold"  : 0.5,
+        "direction"  : "<",
+        "weight"     : 2.5,
+        "severity"   : "HIGH",
+        "description": "Insecure HTTP protocol (no SSL/TLS certificate)",
+        "implication": "Cleartext transmission lacks cryptographic encryption, exposing user authentication tokens and sensitive form inputs to adversary-in-the-middle (AitM) harvesting.",
     },
     {
         "feature"    : "HasObfuscation",
         "threshold"  : 0.5,
         "direction"  : ">",
         "weight"     : 2.5,
+        "severity"   : "HIGH",
         "description": "URL obfuscation detected (% hex or @ symbols)",
+        "implication": "Deliberate URL encoding (%xx hex sequences) or user-info delimiters (@) designed to evade static lexical security filters and gateway boundary scanners.",
+    },
+    {
+        "feature"    : "HasSocialNet",
+        "threshold"  : 0.5,
+        "direction"  : "<",
+        "weight"     : 2.5,
+        "severity"   : "HIGH",
+        "description": "No social network integration links",
+        "implication": "Authentic enterprise portals maintain active social and corporate links; absence is characteristic of static, single-purpose cloned landing pages.",
+    },
+    {
+        "feature"    : "HasCopyrightInfo",
+        "threshold"  : 0.5,
+        "direction"  : "<",
+        "weight"     : 2.5,
+        "severity"   : "HIGH",
+        "description": "No legitimate copyright notice on page",
+        "implication": "Missing corporate copyright declarations and legal terms, typical of short-lived spoof sites created for rapid credential harvesting campaigns.",
+    },
+    {
+        "feature"    : "DomainTitleMatchScore",
+        "threshold"  : 30.0,
+        "direction"  : "<",
+        "weight"     : 2.0,
+        "severity"   : "HIGH",
+        "description": "Low domain-to-page title match score (<30)",
+        "implication": "Severe semantic divergence between the registered domain name and the declared HTML page title, indicating brand masquerading.",
+    },
+    {
+        "feature"    : "HasDescription",
+        "threshold"  : 0.5,
+        "direction"  : "<",
+        "weight"     : 2.0,
+        "severity"   : "MEDIUM",
+        "description": "Missing website meta description",
+        "implication": "Omission of standard HTML OpenGraph metadata and search indexing descriptions commonly bypassed by automated phishing kit builders.",
     },
     {
         "feature"    : "SpacialCharRatioInURL",
         "threshold"  : 0.06,
         "direction"  : ">",
         "weight"     : 1.5,
+        "severity"   : "MEDIUM",
         "description": "Suspicious density of special characters in URL (>6%)",
+        "implication": "Dense punctuation patterns and non-standard symbols utilized to encode malicious redirection targets or evade regex inspection.",
     },
     {
         "feature"    : "DegitRatioInURL",
         "threshold"  : 0.02,
         "direction"  : ">",
         "weight"     : 1.5,
+        "severity"   : "MEDIUM",
         "description": "Abnormal digit ratio in URL (>2%)",
+        "implication": "Excessive numerical sequences indicative of machine-generated session identifiers or hex-encoded tracking tokens.",
     },
     {
         "feature"    : "URLLength",
         "threshold"  : 40.0,
         "direction"  : ">",
         "weight"     : 1.0,
+        "severity"   : "MEDIUM",
         "description": "Excessively long URL (>40 characters)",
+        "implication": "URL string length exceeds standard navigation norms, commonly employed to conceal destination parameters beyond browser address bar displays.",
     },
     {
         "feature"    : "NoOfOtherSpecialCharsInURL",
         "threshold"  : 2.0,
         "direction"  : ">",
         "weight"     : 1.0,
+        "severity"   : "LOW",
         "description": "Multiple non-standard special characters (>2)",
+        "implication": "Unconventional delimiters embedded in the lexical path designed to bypass strict lexical parsers.",
     },
     {
         "feature"    : "HasSubmitButton",
         "threshold"  : 0.5,
         "direction"  : "<",
         "weight"     : 1.0,
+        "severity"   : "LOW",
         "description": "Missing standard interactive submit elements",
+        "implication": "Non-standard form construction that relies on stealth JavaScript keyloggers or clickjacking rather than conventional submit buttons.",
     },
     {
         "feature"    : "IsResponsive",
         "threshold"  : 0.5,
         "direction"  : "<",
         "weight"     : 1.0,
+        "severity"   : "LOW",
         "description": "Site lacks responsive design layout",
+        "implication": "Absence of mobile/viewport meta tags, typical of static cloned phishing templates rather than maintained production web properties.",
     },
 ]
 
@@ -178,10 +206,11 @@ class RuleEngine:
     def _evaluate_sample(self, sample: dict) -> dict:
         """
         Evaluate a single sample (dict of feature_name -> value).
-        Returns verdict dict.
+        Returns verdict dict with forensic rule details.
         """
         risk_score = 0.0
         triggered  = []
+        triggered_details = []
 
         for rule in self.rules:
             feat = rule["feature"]
@@ -199,21 +228,31 @@ class RuleEngine:
             if fired:
                 risk_score += rule["weight"]
                 triggered.append(rule["description"])
+                triggered_details.append({
+                    "description": rule["description"],
+                    "feature"    : feat,
+                    "weight"     : rule["weight"],
+                    "severity"   : rule.get("severity", "MEDIUM"),
+                    "implication": rule.get("implication", "Heuristic threshold violation."),
+                    "observed"   : val,
+                    "threshold"  : thr,
+                })
 
         confidence = min(risk_score / self.max_score, 1.0)
         verdict    = "phishing" if risk_score >= self.threshold else "legitimate"
 
         if triggered:
-            explanation = "Triggered rules: " + "; ".join(triggered) + "."
+            explanation = f"Triggered {len(triggered)} rule(s): " + "; ".join(triggered) + "."
         else:
-            explanation = "No risk rules triggered. URL appears legitimate."
+            explanation = "Zero heuristic risk rules triggered. URL structure conforms to nominal benign baseline."
 
         return {
-            "verdict"    : verdict,
-            "confidence" : round(confidence, 4),
-            "risk_score" : round(risk_score, 4),
-            "triggered"  : triggered,
-            "explanation": explanation,
+            "verdict"          : verdict,
+            "confidence"       : round(confidence, 4),
+            "risk_score"       : round(risk_score, 4),
+            "triggered"        : triggered,
+            "triggered_details": triggered_details,
+            "explanation"      : explanation,
         }
 
     def predict_sample(self, sample: dict) -> dict:

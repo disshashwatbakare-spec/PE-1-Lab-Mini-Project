@@ -91,25 +91,21 @@ class FusionEngine:
         agree = (rule_verdict == ml_verdict)
         manual_review = False
 
+        ml_contrib   = self.ml_weight   * ml_confidence
+        rule_contrib = self.rule_weight * rule_confidence
+
         if agree:
             # Weighted blend of confidences
-            blended_conf = (
-                self.ml_weight   * ml_confidence +
-                self.rule_weight * rule_confidence
-            )
+            blended_conf = ml_contrib + rule_contrib
             final_verdict = ml_verdict
         else:
             # Disagreement: trust ML more but reduce confidence
-            blended_conf  = self.ml_weight * ml_confidence
-            # Weighted verdict: pick whichever has higher weighted confidence
-            ml_score   = self.ml_weight   * ml_confidence
-            rule_score = self.rule_weight * rule_confidence
-
-            if ml_score >= rule_score:
+            if ml_contrib >= rule_contrib:
                 final_verdict = ml_verdict
+                blended_conf  = ml_contrib
             else:
                 final_verdict = rule_verdict
-                blended_conf  = rule_score
+                blended_conf  = rule_contrib
 
             if blended_conf < self.review_threshold:
                 manual_review = True
@@ -118,16 +114,30 @@ class FusionEngine:
         anomaly_contradicts = (
             anomaly_flag == 1 and final_verdict == "legitimate"
         )
+        anomaly_penalty = self.anomaly_confidence_penalty if anomaly_contradicts else 0.0
         if anomaly_contradicts:
-            blended_conf  = max(0.0, blended_conf - self.anomaly_confidence_penalty)
+            blended_conf  = max(0.0, blended_conf - anomaly_penalty)
             manual_review = True
 
         blended_conf = round(float(np.clip(blended_conf, 0.0, 1.0)), 4)
 
-        # ---- Step 3: build summary ----
+        # ---- Step 3: build summary and consensus metadata ----
         agreement_str = "agree" if agree else "DISAGREE"
         anomaly_str   = "flagged as anomalous" if anomaly_flag else "not anomalous"
         review_str    = " ⚠️ Manual review recommended." if manual_review else ""
+
+        if agree and not anomaly_contradicts:
+            consensus_status = "Unanimous Consensus (All Paradigms Agree)"
+        elif agree and anomaly_contradicts:
+            consensus_status = "Supervised Consensus with Anomaly Warning"
+        else:
+            consensus_status = "Cross-Paradigm Conflict (Review Recommended)"
+
+        formula_str = (
+            f"({self.ml_weight:.2f} * {ml_confidence:.1%}) + ({self.rule_weight:.2f} * {rule_confidence:.1%})"
+            + (f" - {anomaly_penalty:.1%}" if anomaly_penalty > 0 else "")
+            + f" = {blended_conf:.1%}"
+        )
 
         summary = (
             f"Final verdict: {final_verdict.upper()} "
@@ -140,6 +150,18 @@ class FusionEngine:
             "final_verdict"    : final_verdict,
             "final_confidence" : blended_conf,
             "manual_review"    : manual_review,
+            "fusion_math"      : {
+                "ml_weight"       : self.ml_weight,
+                "rule_weight"     : self.rule_weight,
+                "ml_confidence"   : round(float(ml_confidence), 4),
+                "rule_confidence" : round(float(rule_confidence), 4),
+                "ml_component"    : round(float(ml_contrib), 4),
+                "rule_component"  : round(float(rule_contrib), 4),
+                "anomaly_penalty" : round(float(anomaly_penalty), 4),
+                "formula_str"     : formula_str,
+                "consensus_status": consensus_status,
+                "is_agreement"    : agree,
+            },
             "signals": {
                 "rule_engine": {
                     "verdict"    : rule_verdict,
